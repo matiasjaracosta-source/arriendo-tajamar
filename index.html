@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arriendo Torres de Tajamar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: cabecera sobria, dos columnas (datos del mes a la izquierda, resultado a la derecha), acuerdo fijo abajo. */
+:root{
+  --bg:#eef1f2; --surface:#ffffff; --ink:#16212b; --muted:#5b6b78; --line:#cfd8dd;
+  --accent:#0b4f8a; --accent-ink:#ffffff; --soft:#dfe9f1; --ok:#1d7a4c; --warn:#a85a00;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#10171d; --surface:#18222b; --ink:#e6edf2; --muted:#93a4b1; --line:#2c3a46;
+  --accent:#6db3ee; --accent-ink:#0c1620; --soft:#1f3142; --ok:#5fcf97; --warn:#f0a94a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#10171d; --surface:#18222b; --ink:#e6edf2; --muted:#93a4b1; --line:#2c3a46;
+  --accent:#6db3ee; --accent-ink:#0c1620; --soft:#1f3142; --ok:#5fcf97; --warn:#f0a94a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:1040px;margin-inline:auto;display:flex;flex-direction:column;gap:24px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(24px,4vw,34px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.mes{display:flex;flex-direction:column;gap:4px}
+h2{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.09em;text-transform:uppercase;margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:24px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12.5px;font-weight:500;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+input[type=text],input[type=date]{width:100%;font:500 15px var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+input.txt{font-family:var(--body)}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.calc{display:flex;justify-content:space-between;gap:12px;align-items:baseline;border-top:1px dashed var(--line);padding-top:12px}
+.calc b{font:600 18px var(--mono);font-variant-numeric:tabular-nums}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.extra{display:grid;grid-template-columns:auto minmax(0,1fr) 110px auto;gap:8px;align-items:center}
+button{font:600 13px var(--body);border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.x{padding:6px 9px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile span{font-size:12.5px;color:var(--muted);font-weight:500}
+.tile b{font:600 clamp(19px,2.6vw,26px) var(--mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tile small{font-size:12px;color:var(--muted)}
+.tile.depto{background:var(--accent);border-color:var(--accent)}
+.tile.depto span,.tile.depto b,.tile.depto small{color:var(--accent-ink)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tools .hint{margin-left:4px}
+button:disabled{opacity:.45;cursor:default}
+.tablebox{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:12px;font-weight:500;color:var(--muted);text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{font:400 14px var(--mono);text-align:right;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;font-family:var(--body)}
+td.name{font-weight:600}
+td.name small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+td.total{font-weight:600;font-size:17px;color:var(--accent)}
+tfoot td{border-bottom:0;border-top:2px solid var(--ink);font-weight:600}
+.bar{display:flex;height:26px;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.bar div{display:flex;align-items:center;justify-content:center;font:600 12px var(--body);color:var(--accent-ink);background:var(--accent);min-width:0;overflow:hidden;white-space:nowrap}
+.bar div:nth-child(2){opacity:.78}.bar div:nth-child(3){opacity:.58}
+.check{font-size:13px;font-weight:500;color:var(--ok);margin:0}
+.check.warn{color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+pre{margin:0;font:400 13px/1.5 var(--mono);background:var(--soft);border-radius:4px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.agree td input{max-width:120px;margin-left:auto;text-align:right}
+.agree td:first-child input{margin-left:0;text-align:left;max-width:140px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Arriendo Torres de Tajamar</h1>
+      <p class="sub">Cuánto transfiere cada uno este mes, con arriendo, servicios y gastos comunes.</p>
+    </div>
+    <div class="mes">
+      <label for="fecha">Fecha de pago (UF de ese día)</label>
+      <input type="date" id="fecha" value="2026-10-04">
+    </div>
+  </header>
+
+  <div class="tools">
+    <button type="button" id="undo" title="Ctrl+Z">Deshacer</button>
+    <button type="button" id="redo" title="Ctrl+Y">Rehacer</button>
+    <button type="button" class="primary" id="save" title="Ctrl+S">Guardar</button>
+    <span class="hint" id="estado" aria-live="polite"></span>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid">
+    <section>
+      <h2>Datos del mes</h2>
+      <div class="panel">
+        <div class="field"><label for="uf">Valor UF del <span id="fechaTxt"></span> ($)</label><input type="text" inputmode="decimal" id="uf" value="41.089,96"></div>
+        <div class="calc"><span>Arriendo en pesos (<span id="ufTxt"></span> UF)</span><b id="arriendoPesos"></b></div>
+        <div class="row">
+          <div class="field"><label for="luz">Luz ($)</label><input type="text" inputmode="decimal" id="luz" value="29.584"></div>
+          <div class="field"><label for="gas">Gas ($)</label><input type="text" inputmode="decimal" id="gas" value="1.550"></div>
+        </div>
+        <div class="field"><label for="gc">Gastos comunes ($)</label><input type="text" inputmode="decimal" id="gc" value="222.440"></div>
+      </div>
+
+      <h2>Compras de la casa</h2>
+      <div class="panel">
+        <p class="hint">Marca las que se cobran este mes. Se reparten igual que los gastos.</p>
+        <div id="extras" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div><button type="button" id="addExtra">Agregar compra</button></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Total a transferir</h2>
+      <div class="panel">
+        <div class="tablebox">
+          <table>
+            <thead><tr><th>Persona</th><th>Arriendo</th><th>Luz</th><th>Gas</th><th>G. comunes</th><th>Compras</th><th>Total</th></tr></thead>
+            <tbody id="res"></tbody>
+            <tfoot id="resFoot"></tfoot>
+          </table>
+        </div>
+        <div class="bar" id="bar" aria-hidden="true"></div>
+        <p class="check" id="check"></p>
+      </div>
+
+      <h2>Mensaje para el grupo</h2>
+      <div class="panel">
+        <pre id="msg"></pre>
+        <div class="actions"><button type="button" class="primary" id="copy">Copiar mensaje</button><span class="hint" id="copied" aria-live="polite"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <section>
+    <h2>Acuerdo fijo</h2>
+    <div class="panel">
+      <p class="hint">Esto no cambia mes a mes. El arriendo se reparte según el monto pactado por pieza; los gastos, según las partes de cada uno.</p>
+      <div class="field" style="max-width:200px"><label for="ufArriendo">Arriendo del contrato (UF)</label><input type="text" inputmode="decimal" id="ufArriendo" value="18,11"></div>
+      <div class="tablebox">
+        <table class="agree">
+          <thead><tr><th>Persona</th><th>Pieza</th><th>Pactado ($)</th><th>% del arriendo</th><th>Partes de gastos</th></tr></thead>
+          <tbody id="agree"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const KEY='tajamar-v2';
+let S={
+  fecha:'2026-10-04', uf:'41.089,96', luz:'29.584', gas:'1.550', gc:'222.440', ufArriendo:'18,11',
+  people:[
+    {n:'Kate',pieza:'Pequeña',base:'200.000',partes:'1'},
+    {n:'Caro',pieza:'Mediana',base:'235.000',partes:'1'},
+    {n:'Mati',pieza:'Grande',base:'265.000',partes:'2'}],
+  extras:[{n:'Basurero',m:'8.900',on:false},{n:'Bandeja de platos (escurridor)',m:'15.000',on:false}]
+};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.people&&s.extras)S=Object.assign(S,s)}catch(e){}
+const FIELDS=['fecha','uf','luz','gas','gc','ufArriendo'];
+let hist=[],idx=-1,lastPush=0,saved=JSON.stringify(S),quiet=false;
+// Historial para deshacer/rehacer; lo que se escribe seguido cuenta como un solo paso
+function track(){
+  const j=JSON.stringify(S);
+  if(idx<0){hist=[j];idx=0}
+  else if(!quiet&&j!==hist[idx]){
+    const now=Date.now();
+    if(now-lastPush<900&&idx>0&&idx===hist.length-1) hist[idx]=j;
+    else{hist=hist.slice(0,idx+1);hist.push(j);idx++}
+    lastPush=now;
+  }
+  refreshBar();
+}
+function go(d){
+  const n=idx+d; if(n<0||n>=hist.length)return;
+  idx=n;S=JSON.parse(hist[idx]);lastPush=0;
+  FIELDS.forEach(id=>$(id).value=S[id]);drawAgree();drawExtras();
+  quiet=true;calc();quiet=false;
+}
+function refreshBar(){
+  $('undo').disabled=idx<=0;$('redo').disabled=idx>=hist.length-1;
+  const dirty=JSON.stringify(S)!==saved;
+  $('save').disabled=!dirty;$('estado').textContent=dirty?'Cambios sin guardar':'Guardado en este navegador';
+}
+function guardar(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));saved=JSON.stringify(S);refreshBar()}
+  catch(e){$('estado').textContent='Este navegador no permite guardar'}
+}
+
+// Acepta formato chileno (41.089,96) y también 41089.96
+function num(v){
+  v=String(v||'').replace(/[$\s]/g,'');
+  if(v.includes(',')) v=v.replace(/\./g,'').replace(',','.');
+  else if(/^\d{1,3}(\.\d{3})+$/.test(v)) v=v.replace(/\./g,'');
+  const n=parseFloat(v); return isFinite(n)?n:0;
+}
+const clp=n=>'$'+Math.round(n).toLocaleString('es-CL');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+
+FIELDS.forEach(id=>{
+  $(id).value=S[id];
+  $(id).addEventListener('input',e=>{S[id]=e.target.value;calc()});
+});
+
+const drawAgree=()=>$('agree').innerHTML=S.people.map((p,i)=>`<tr>
+  <td><input class="txt" type="text" id="pn${i}" data-i="${i}" data-k="n" value="${esc(p.n)}" aria-label="Nombre"></td>
+  <td style="font-family:var(--body)">${esc(p.pieza)}</td>
+  <td><input type="text" inputmode="decimal" id="pb${i}" data-i="${i}" data-k="base" value="${esc(p.base)}" aria-label="Monto pactado"></td>
+  <td id="pp${i}"></td>
+  <td><input type="text" inputmode="decimal" id="pg${i}" data-i="${i}" data-k="partes" value="${esc(p.partes)}" aria-label="Partes de gastos"></td></tr>`).join('');
+$('agree').addEventListener('input',e=>{const d=e.target.dataset;if(d.k){S.people[d.i][d.k]=e.target.value;calc()}});
+
+function drawExtras(){
+  $('extras').innerHTML=S.extras.map((x,i)=>`<div class="extra">
+    <input type="checkbox" id="xo${i}" data-i="${i}" data-k="on" ${x.on?'checked':''} aria-label="Cobrar este mes">
+    <input class="txt" type="text" id="xn${i}" data-i="${i}" data-k="n" value="${esc(x.n)}" placeholder="Qué se compró" aria-label="Compra">
+    <input type="text" inputmode="decimal" id="xm${i}" data-i="${i}" data-k="m" value="${esc(x.m)}" placeholder="Monto" aria-label="Monto">
+    <button type="button" class="x" data-del="${i}" aria-label="Quitar compra">Quitar</button></div>`).join('');
+}
+$('extras').addEventListener('input',e=>{const d=e.target.dataset;if(!d.k)return;
+  S.extras[d.i][d.k]=d.k==='on'?e.target.checked:e.target.value;calc()});
+$('extras').addEventListener('click',e=>{const d=e.target.dataset.del;if(d===undefined)return;
+  S.extras.splice(+d,1);drawExtras();calc()});
+$('addExtra').addEventListener('click',()=>{S.extras.push({n:'',m:'',on:true});drawExtras();calc();
+  $('xn'+(S.extras.length-1)).focus()});
+
+function calc(){
+  const ufA=num(S.ufArriendo), arriendo=Math.round(ufA*num(S.uf));
+  const luz=num(S.luz), gas=num(S.gas), gc=num(S.gc);
+  const [yy,mm,dd]=(S.fecha||'').split('-'), okF=yy&&mm&&dd;
+  const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const mesTxt=okF?MESES[+mm-1]+' '+yy:'sin fecha', fechaTxt=okF?dd+'-'+mm+'-'+yy:'día de pago';
+  $('fechaTxt').textContent=fechaTxt;
+  const extras=S.extras.filter(x=>x.on).reduce((a,x)=>a+num(x.m),0);
+  const baseTot=S.people.reduce((a,p)=>a+num(p.base),0)||1;
+  const partesTot=S.people.reduce((a,p)=>a+num(p.partes),0)||1;
+  $('ufTxt').textContent=ufA.toLocaleString('es-CL');
+  $('arriendoPesos').textContent=clp(arriendo);
+
+  const rows=S.people.map((p,i)=>{
+    const pct=num(p.base)/baseTot, f=num(p.partes)/partesTot;
+    const r={n:p.n,pieza:p.pieza,pct,partes:num(p.partes),a:arriendo*pct,l:luz*f,s:gas*f,g:gc*f,x:extras*f};
+    r.t=Math.round(r.a+r.l+r.s+r.g+r.x);
+    $('pp'+i).textContent=(pct*100).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+    return r;
+  });
+  $('res').innerHTML=rows.map(r=>`<tr><td class="name">${esc(r.n)}<small>Pieza ${esc(r.pieza.toLowerCase())} · ${r.partes} ${r.partes===1?'parte':'partes'}</small></td>
+    <td>${clp(r.a)}</td><td>${clp(r.l)}</td><td>${clp(r.s)}</td><td>${clp(r.g)}</td><td>${clp(r.x)}</td><td class="total">${clp(r.t)}</td></tr>`).join('');
+  const real=arriendo+luz+gas+gc+extras, suma=rows.reduce((a,r)=>a+r.t,0);
+  $('resFoot').innerHTML=`<tr><td>Total depto</td><td>${clp(arriendo)}</td><td>${clp(luz)}</td><td>${clp(gas)}</td><td>${clp(gc)}</td><td>${clp(extras)}</td><td>${clp(real)}</td></tr>`;
+  $('bar').innerHTML=rows.map(r=>`<div style="flex:${Math.max(r.t,1)}">${esc(r.n)} ${Math.round(r.t/(suma||1)*100)}%</div>`).join('');
+  $('tiles').innerHTML=rows.map(r=>`<div class="tile"><span>${esc(r.n)} transfiere</span><b>${clp(r.t)}</b>
+    <small>${Math.round(r.t/(suma||1)*100)}% del total</small></div>`).join('')
+    +`<div class="tile depto"><span>Total depto ${esc(mesTxt)}</span><b>${clp(real)}</b><small>Arriendo ${clp(arriendo)}</small></div>`;
+  const dif=Math.abs(suma-real), ck=$('check');
+  ck.className='check'+(dif>2?' warn':'');
+  ck.textContent=dif>2?`Revisa los datos: las transferencias suman ${clp(suma)} y el total del depto es ${clp(real)}.`
+    :`Cuadra: las tres transferencias suman ${clp(suma)}${dif?` (diferencia de $${Math.round(dif)} por redondeo)`:''}.`;
+
+  $('msg').textContent=`Arriendo ${mesTxt} (UF ${S.uf} al ${fechaTxt})\n`
+    +rows.map(r=>`${r.n}: ${clp(r.t)}`).join('\n')
+    +`\n\nDetalle: arriendo ${clp(arriendo)} · luz ${clp(luz)} · gas ${clp(gas)} · gastos comunes ${clp(gc)}`
+    +(extras?` · compras ${clp(extras)}`:'');
+  track();
+}
+
+$('copy').addEventListener('click',()=>{
+  const t=$('msg').textContent, done=m=>{$('copied').textContent=m;setTimeout(()=>$('copied').textContent='',2500)};
+  const fallback=()=>{const r=document.createRange();r.selectNodeContents($('msg'));const s=getSelection();s.removeAllRanges();s.addRange(r);done('Texto seleccionado, cópialo con Ctrl+C')};
+  try{navigator.clipboard.writeText(t).then(()=>done('Copiado'),fallback)}catch(e){fallback()}
+});
+
+$('undo').addEventListener('click',()=>go(-1));
+$('redo').addEventListener('click',()=>go(1));
+$('save').addEventListener('click',guardar);
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey))return;
+  const k=e.key.toLowerCase();
+  if(k==='z'){e.preventDefault();go(e.shiftKey?1:-1)}
+  else if(k==='y'){e.preventDefault();go(1)}
+  else if(k==='s'){e.preventDefault();guardar()}
+});
+
+drawAgree();drawExtras();calc();
+</script>
